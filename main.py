@@ -259,25 +259,51 @@ def sample_timestep(x, t):
         noise = torch.randn_like(x)
         return model_mean + torch.sqrt(posterior_variance_t) * noise 
 
+# @torch.no_grad()
+# def sample_plot_image():
+#     # Sample noise
+#     img_size = IMG_SIZE
+#     img = torch.randn((1, 3, img_size, img_size), device=device)
+#     plt.figure(figsize=(15,15))
+#     plt.axis('off')
+#     num_images = 10
+#     stepsize = int(T/num_images)
+
+#     for i in range(0,T)[::-1]:
+#         t = torch.full((1,), i, device=device, dtype=torch.long)
+#         img = sample_timestep(img, t)
+#         # Edit: This is to maintain the natural range of the distribution
+#         img = torch.clamp(img, -1.0, 1.0)
+#         if i % stepsize == 0:
+#             plt.subplot(1, num_images, int(i/stepsize)+1)
+#             show_tensor_image(img.detach().cpu())
+#     plt.show()   
+    
+image_save_dir = "./generated_images"
 @torch.no_grad()
-def sample_plot_image():
-    # Sample noise
+def sample_plot_image(epoch, step, save_only_last=False):
     img_size = IMG_SIZE
     img = torch.randn((1, 3, img_size, img_size), device=device)
-    plt.figure(figsize=(15,15))
-    plt.axis('off')
-    num_images = 10
-    stepsize = int(T/num_images)
-
-    for i in range(0,T)[::-1]:
+    for i in range(0, T)[::-1]:
         t = torch.full((1,), i, device=device, dtype=torch.long)
         img = sample_timestep(img, t)
-        # Edit: This is to maintain the natural range of the distribution
         img = torch.clamp(img, -1.0, 1.0)
-        if i % stepsize == 0:
-            plt.subplot(1, num_images, int(i/stepsize)+1)
+        if i == 0:  # Last timestep
+            plt.figure(figsize=(3,3))
             show_tensor_image(img.detach().cpu())
-    plt.show()   
+            if save_only_last:
+                # Save the image
+                plt.axis('off')
+                plt.gca().set_position([0, 0, 1, 1])
+                plt.gca().set_axis_off()
+                plt.subplots_adjust(top=1, bottom=0, right=1, left=0, 
+                                    hspace=0, wspace=0)
+                plt.margins(0,0)
+                plt.gca().xaxis.set_major_locator(plt.NullLocator())
+                plt.gca().yaxis.set_major_locator(plt.NullLocator())
+                image_path = os.path.join(image_save_dir, f"epoch_{epoch}_step_{step}.png")
+                plt.savefig(image_path, bbox_inches='tight', pad_inches=0)
+                plt.close()
 
 
 # Train
