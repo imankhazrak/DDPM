@@ -52,7 +52,7 @@ def forward_diffusion_sample(x_0, t, device="cpu"):
 
 
 # Define beta schedule
-T = 300
+T = 3000
 betas = linear_beta_schedule(timesteps=T)
 
 # Pre-calculate different terms for closed form
@@ -286,7 +286,7 @@ def sample_plot_image():
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model.to(device)
 optimizer = Adam(model.parameters(), lr=0.001)
-epochs = 100 # Try more!
+epochs = 1000 # Try more!
 
 for epoch in range(epochs):
     for step, batch in enumerate(dataloader):
